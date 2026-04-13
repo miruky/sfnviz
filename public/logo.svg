@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="sfnvizのロゴ">
+  <title>sfnviz</title>
+  <rect x="22" y="4" width="20" height="15" rx="5" fill="#b8455e"/>
+  <rect x="5" y="45" width="20" height="15" rx="5" fill="#b8455e" fill-opacity="0.55"/>
+  <rect x="39" y="45" width="20" height="15" rx="5" fill="#37434b"/>
+  <path d="M32 19v8M32 27C32 38 15 35 15 45M32 27c0 11 17 8 17 18" fill="none" stroke="#7d8b94" stroke-width="3.5" stroke-linecap="round"/>
+</svg>
