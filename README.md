@@ -22,6 +22,7 @@ Step Functionsのデバッグは「デプロイして、実行して、コンソ
 - ASL JSONを左のエディタに貼り付けるか、サンプル(Choice + Catch、Parallel、Map + ループ)から選びます
 - 「実行入力」に最初のJSONを、「Taskのモック結果」に状態名をキーにした結果を書きます。`{"$error": "名前"}` を与えるとそのTaskはエラーを投げ、Catchの動きを確かめられます
 - 「実行する」でシミュレートし、「前へ / 次へ」(または左右キー)でステップを移動します。図では現在の状態が強調され、通過済みの状態は薄く塗られます
+- 編集内容はブラウザに自動保存されます。「共有リンクをコピー」を押すと、定義・入力・モックをURLに畳んだリンクが手に入り、サーバを介さずそのまま共有できます
 
 ## アーキテクチャ
 
@@ -35,7 +36,7 @@ Step Functionsのデバッグは「デプロイして、実行して、コンソ
 | :--------- | :------------------- |
 | 言語       | TypeScript 5(strict) |
 | ビルド     | Vite                 |
-| テスト     | Vitest(45テスト)     |
+| テスト     | Vitest(51テスト)     |
 | リンタ     | ESLint + Prettier    |
 | CI / CD    | GitHub Actions       |
 | 配信       | GitHub Pages         |
@@ -57,6 +58,7 @@ Step Functionsのデバッグは「デプロイして、実行して、コンソ
 - `src/lib/runner.ts` — シミュレータとトレース生成
 - `src/lib/diagram.ts` — 再帰レイアウトとSVG描画
 - `src/lib/examples.ts` — サンプル定義
+- `src/lib/share.ts` — 定義・入力・モックをURLハッシュへ畳む共有の符号化
 - `src/app.ts` — エディタ・図・ステップ再生の配線
 - `docs/architecture.svg` — アーキテクチャ図
 
