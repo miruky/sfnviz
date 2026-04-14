@@ -6,6 +6,7 @@ import { renderDiagram } from './lib/diagram';
 import { simulate, type RunResult, type TraceStep } from './lib/runner';
 import type { Json } from './lib/jsonpath';
 import { EXAMPLES } from './lib/examples';
+import { parseShareHash, shareHash } from './lib/share';
 
 const STORAGE_KEY = 'sfnviz:v1';
 
@@ -59,7 +60,11 @@ export function mountApp(root: HTMLElement): void {
           <textarea id="mocks" spellcheck="false"></textarea>
         </label>
       </div>
-      <button type="button" id="run" class="primary">実行する</button>
+      <div class="editor-actions">
+        <button type="button" id="run" class="primary">実行する</button>
+        <button type="button" id="share" class="ghost">共有リンクをコピー</button>
+        <span id="share-feedback" class="share-feedback" role="status" aria-live="polite"></span>
+      </div>
       <p id="run-error" class="run-error" hidden></p>
     </section>
     <section class="pane diagram-pane" aria-labelledby="diagram-h">
@@ -92,6 +97,8 @@ export function mountApp(root: HTMLElement): void {
   const stepDetailEl = root.querySelector('#step-detail') as HTMLDivElement;
   const runEl = root.querySelector('#run') as HTMLButtonElement;
   const runErrorEl = root.querySelector('#run-error') as HTMLParagraphElement;
+  const shareEl = root.querySelector('#share') as HTMLButtonElement;
+  const shareFeedbackEl = root.querySelector('#share-feedback') as HTMLSpanElement;
   const prevEl = root.querySelector('#prev') as HTMLButtonElement;
   const nextEl = root.querySelector('#next') as HTMLButtonElement;
 
@@ -200,6 +207,30 @@ export function mountApp(root: HTMLElement): void {
   });
   for (const el of [inputEl, mocksEl]) el.addEventListener('input', save);
   runEl.addEventListener('click', execute);
+
+  let shareFeedbackTimer: ReturnType<typeof setTimeout> | undefined;
+  function flashShare(message: string): void {
+    shareFeedbackEl.textContent = message;
+    if (shareFeedbackTimer) clearTimeout(shareFeedbackTimer);
+    shareFeedbackTimer = setTimeout(() => {
+      shareFeedbackEl.textContent = '';
+    }, 2400);
+  }
+  shareEl.addEventListener('click', () => {
+    const hash = shareHash({ asl: aslEl.value, input: inputEl.value, mocks: mocksEl.value });
+    const url = location.origin + location.pathname + hash;
+    void navigator.clipboard?.writeText(url).then(
+      () => flashShare('共有リンクをコピーした'),
+      () => {
+        location.hash = hash;
+        flashShare('URLに共有状態を載せた');
+      },
+    );
+    if (!navigator.clipboard) {
+      location.hash = hash;
+      flashShare('URLに共有状態を載せた');
+    }
+  });
   prevEl.addEventListener('click', () => {
     cursor = Math.max(0, cursor - 1);
     showStep();
@@ -214,6 +245,8 @@ export function mountApp(root: HTMLElement): void {
     if (event.key === 'ArrowRight') nextEl.click();
   });
 
+  // 起動時の優先順: 共有リンク(URLハッシュ) > 前回の保存 > 先頭サンプル
+  const shared = parseShareHash(location.hash);
   let saved: { asl: string; input: string; mocks: string } | undefined;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -221,7 +254,12 @@ export function mountApp(root: HTMLElement): void {
   } catch {
     saved = undefined;
   }
-  if (saved && typeof saved.asl === 'string' && saved.asl.trim() !== '') {
+  if (shared && shared.asl.trim() !== '') {
+    aslEl.value = shared.asl;
+    inputEl.value = shared.input;
+    mocksEl.value = shared.mocks;
+    save();
+  } else if (saved && typeof saved.asl === 'string' && saved.asl.trim() !== '') {
     aslEl.value = saved.asl;
     inputEl.value = saved.input ?? '';
     mocksEl.value = saved.mocks ?? '';
