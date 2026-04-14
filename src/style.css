@@ -1,30 +1,36 @@
 :root {
   color-scheme: light dark;
-  --bg: #f6f4f5;
-  --surface: #ffffff;
-  --text: #251f22;
-  --muted: #6c6168;
-  --border: #e5dee2;
-  --accent: #b8455e;
-  --ok: #2e8b57;
-  --bad: #b04040;
-  --warn: #b06f15;
-  --shadow: 0 1px 2px rgba(35, 22, 28, 0.05), 0 4px 16px rgba(35, 22, 28, 0.06);
+  --bg: #f3f1ef;
+  --surface: #faf8f6;
+  --sunken: #efece9;
+  --text: #221d1f;
+  --muted: #6a6066;
+  --faint: #938b8f;
+  --border: #e4ddd9;
+  --rule: #d9d1cd;
+  --accent: #b03a55;
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, transparent);
+  --ok: #2f7d56;
+  --bad: #b03d3d;
+  --warn: #9a6713;
   --mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #161214;
-    --surface: #1f1a1d;
+    --bg: #141113;
+    --surface: #1c181b;
+    --sunken: #110e10;
     --text: #ece5e8;
-    --muted: #a3969d;
-    --border: #352d31;
-    --accent: #e0768d;
-    --ok: #54c287;
+    --muted: #a1959b;
+    --faint: #756a70;
+    --border: #322b2f;
+    --rule: #3b3338;
+    --accent: #e1788e;
+    --ok: #57c489;
     --bad: #e57a67;
     --warn: #d6a35e;
-    --shadow: none;
   }
 }
 
@@ -34,12 +40,18 @@
   box-sizing: border-box;
 }
 
+/* hidden 属性は display 指定より弱いので、明示的に隠す(.errors などは display:grid を持つ) */
+[hidden] {
+  display: none !important;
+}
+
 body {
   font-family: 'Hiragino Sans', 'Noto Sans JP', system-ui, sans-serif;
   background: var(--bg);
   color: var(--text);
-  line-height: 1.65;
-  padding: 32px 24px 48px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  padding: 48px 32px 64px;
 }
 
 #app {
@@ -47,55 +59,79 @@ body {
   margin: 0 auto;
 }
 
+/* ヘッダ */
+
 .site-header {
-  margin-bottom: 28px;
+  margin-bottom: 40px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--rule);
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .brand-mark {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   color: var(--text);
 }
 
 .brand-name {
-  font-size: 1.7rem;
+  font-size: 1.55rem;
   font-weight: 700;
+  letter-spacing: -0.015em;
 }
 
 .tagline {
   color: var(--muted);
-  margin-top: 4px;
+  margin-top: 12px;
+  max-width: 62ch;
+  font-size: 0.95rem;
 }
+
+/* レイアウト: 編集と図を非対称2カラムで。罫線と余白で分け、影は使わない */
 
 main {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
-  gap: 24px;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: 40px;
   align-items: start;
 }
 
 @media (max-width: 1040px) {
   main {
     grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
   }
 }
 
 .pane {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 24px;
-  box-shadow: var(--shadow);
+  min-width: 0;
 }
 
-.pane h2 {
-  font-size: 1.05rem;
+.pane > h2,
+.pane-head h2 {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.pane > h2::before,
+.pane-head h2::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: var(--accent);
+  flex: none;
 }
 
 .pane-head {
@@ -104,15 +140,15 @@ main {
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
-.diagram-pane h2 {
-  margin-bottom: 12px;
+.diagram-pane > h2 {
+  margin-bottom: 16px;
 }
 
 .preset-label {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--muted);
   display: inline-flex;
   align-items: center;
@@ -121,36 +157,49 @@ main {
 
 select {
   font: inherit;
+  font-size: 0.85rem;
   color: var(--text);
-  background: var(--bg);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 6px 10px;
+  transition: border-color 0.15s var(--ease);
 }
+
+select:hover {
+  border-color: var(--faint);
+}
+
+/* エディタ群 */
 
 textarea {
   width: 100%;
   resize: vertical;
   font-family: var(--mono);
   font-size: 0.8rem;
-  line-height: 1.6;
+  line-height: 1.65;
   tab-size: 2;
   color: var(--text);
-  background: var(--bg);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 12px;
+  padding: 14px;
+  transition: border-color 0.15s var(--ease);
+}
+
+textarea:hover {
+  border-color: var(--faint);
 }
 
 #asl {
-  min-height: 340px;
+  min-height: 360px;
 }
 
 .sub-editors {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 12px;
-  margin-top: 12px;
+  gap: 16px;
+  margin-top: 16px;
 }
 
 @media (max-width: 560px) {
@@ -160,14 +209,14 @@ textarea {
 }
 
 .sub-editor {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--muted);
   display: grid;
-  gap: 4px;
+  gap: 6px;
 }
 
 .sub-editor textarea {
-  min-height: 120px;
+  min-height: 124px;
 }
 
 textarea:focus-visible,
@@ -175,76 +224,103 @@ select:focus-visible,
 button:focus-visible,
 .state:focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: 1px;
+  outline-offset: 2px;
 }
 
 .errors {
   list-style: none;
-  margin-top: 12px;
-  border-left: 3px solid var(--bad);
-  background: color-mix(in srgb, var(--bad) 7%, var(--surface));
-  border-radius: 0 8px 8px 0;
-  padding: 10px 14px;
-  font-size: 0.86rem;
+  margin-top: 16px;
+  border-left: 2px solid var(--bad);
+  padding: 4px 0 4px 14px;
+  font-size: 0.85rem;
   color: var(--bad);
   display: grid;
   gap: 4px;
 }
 
+/* ボタン */
+
+.editor-actions {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.share-feedback {
+  font-size: 0.8rem;
+  color: var(--ok);
+}
+
 .primary {
-  margin-top: 16px;
   font: inherit;
   font-weight: 600;
+  font-size: 0.92rem;
   color: #fff;
   background: var(--accent);
   border: none;
-  border-radius: 10px;
-  padding: 10px 24px;
+  border-radius: 9px;
+  padding: 11px 26px;
   cursor: pointer;
-  transition: filter 0.15s ease;
+  transition:
+    transform 0.12s var(--ease),
+    background-color 0.15s var(--ease);
+}
+
+@media (prefers-color-scheme: dark) {
+  .primary {
+    color: #1a1012;
+  }
 }
 
 .primary:hover {
-  filter: brightness(1.08);
+  background: color-mix(in srgb, var(--accent) 88%, #000);
+}
+
+.primary:active {
+  transform: translateY(1px);
 }
 
 .run-error {
-  margin-top: 8px;
+  margin-top: 10px;
   font-size: 0.84rem;
   color: var(--bad);
 }
 
 .ghost {
   font: inherit;
-  font-size: 0.83rem;
+  font-size: 0.82rem;
   color: var(--accent);
   background: none;
-  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border));
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
   border-radius: 8px;
-  padding: 4px 14px;
+  padding: 5px 15px;
   cursor: pointer;
   transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease;
+    background-color 0.15s var(--ease),
+    border-color 0.15s var(--ease);
 }
 
 .ghost:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  background: var(--accent-soft);
   border-color: var(--accent);
 }
 
 .ghost:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: default;
 }
+
+/* 遷移図 */
 
 .diagram {
   overflow: auto;
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 12px;
-  background: var(--bg);
-  max-height: 560px;
+  padding: 20px;
+  background: var(--surface);
+  max-height: 600px;
 }
 
 .diagram svg {
@@ -252,34 +328,33 @@ button:focus-visible,
   width: 100%;
   height: auto;
   min-width: 420px;
-  animation: rise 0.3s ease both;
+  animation: rise 0.4s var(--ease) both;
 }
 
 .placeholder {
   color: var(--muted);
-  padding: 24px;
+  padding: 32px 8px;
+  font-size: 0.9rem;
 }
-
-/* 遷移図のノードと辺 */
 
 .state {
   cursor: default;
 }
 
 .state-card {
-  fill-opacity: 0.06;
+  fill-opacity: 0.05;
   stroke-width: 1.5;
   transition:
-    fill-opacity 0.15s ease,
-    stroke-width 0.15s ease;
+    fill-opacity 0.18s var(--ease),
+    stroke-width 0.18s var(--ease);
 }
 
 .state.visited .state-card {
-  fill-opacity: 0.16;
+  fill-opacity: 0.14;
 }
 
 .state.current .state-card {
-  fill-opacity: 0.24;
+  fill-opacity: 0.22;
   stroke-width: 3;
 }
 
@@ -305,7 +380,7 @@ button:focus-visible,
 
 .edge {
   fill: none;
-  stroke: color-mix(in srgb, var(--muted) 55%, var(--border));
+  stroke: var(--rule);
   stroke-width: 1.5;
 }
 
@@ -323,7 +398,7 @@ button:focus-visible,
 }
 
 .arrow-head {
-  fill: color-mix(in srgb, var(--muted) 55%, var(--border));
+  fill: var(--rule);
 }
 
 .edge-label {
@@ -339,8 +414,10 @@ button:focus-visible,
 /* ステップ再生 */
 
 .player {
-  margin-top: 16px;
-  animation: rise 0.25s ease both;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--rule);
+  animation: rise 0.3s var(--ease) both;
 }
 
 .player-controls {
@@ -352,14 +429,16 @@ button:focus-visible,
 
 .step-pos {
   font-family: var(--mono);
-  font-size: 0.86rem;
+  font-size: 0.84rem;
   font-variant-numeric: tabular-nums;
+  color: var(--muted);
 }
 
 .outcome {
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   font-weight: 600;
   margin-left: auto;
+  letter-spacing: 0.02em;
 }
 
 .outcome.succeeded {
@@ -371,7 +450,7 @@ button:focus-visible,
 }
 
 .step-detail {
-  margin-top: 12px;
+  margin-top: 16px;
 }
 
 .step-head {
@@ -379,20 +458,21 @@ button:focus-visible,
   align-items: baseline;
   gap: 10px;
   flex-wrap: wrap;
-  font-size: 0.95rem;
+  font-size: 1rem;
 }
 
 .step-path {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: var(--muted);
+  font-family: var(--mono);
 }
 
 .type-badge {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-family: var(--mono);
   border: 1px solid var(--border);
   border-radius: 999px;
-  padding: 0 10px;
+  padding: 1px 10px;
   color: var(--muted);
 }
 
@@ -404,8 +484,8 @@ button:focus-visible,
 .io {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 12px;
-  margin-top: 10px;
+  gap: 16px;
+  margin-top: 14px;
 }
 
 @media (max-width: 560px) {
@@ -415,19 +495,21 @@ button:focus-visible,
 }
 
 .io h3 {
-  font-size: 0.78rem;
-  color: var(--muted);
-  margin-bottom: 4px;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 6px;
 }
 
 .io pre {
   font-family: var(--mono);
   font-size: 0.76rem;
-  line-height: 1.55;
-  background: var(--bg);
+  line-height: 1.6;
+  background: var(--sunken);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 10px;
+  padding: 12px;
   overflow: auto;
   max-height: 240px;
   white-space: pre-wrap;
@@ -435,16 +517,17 @@ button:focus-visible,
 }
 
 .site-footer {
-  margin-top: 32px;
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--rule);
   font-size: 0.8rem;
   color: var(--muted);
-  text-align: center;
 }
 
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
