@@ -61,7 +61,7 @@ export function mountApp(root: HTMLElement): void {
         </label>
       </div>
       <div class="editor-actions">
-        <button type="button" id="run" class="primary">実行する</button>
+        <button type="button" id="run" class="primary" title="Cmd / Ctrl + Enter でも実行">実行する</button>
         <button type="button" id="share" class="ghost">共有リンクをコピー</button>
         <span id="share-feedback" class="share-feedback" role="status" aria-live="polite"></span>
       </div>
@@ -240,6 +240,12 @@ export function mountApp(root: HTMLElement): void {
     showStep();
   });
   root.addEventListener('keydown', (event) => {
+    // Cmd/Ctrl+Enter はエディタにフォーカスがあっても実行する
+    if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+      event.preventDefault();
+      execute();
+      return;
+    }
     if (playerEl.hidden || event.target instanceof HTMLTextAreaElement) return;
     if (event.key === 'ArrowLeft') prevEl.click();
     if (event.key === 'ArrowRight') nextEl.click();

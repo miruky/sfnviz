@@ -349,6 +349,10 @@ button:focus-visible,
     stroke-width 0.18s var(--ease);
 }
 
+.state:hover .state-card {
+  fill-opacity: 0.11;
+}
+
 .state.visited .state-card {
   fill-opacity: 0.14;
 }
@@ -405,6 +409,11 @@ button:focus-visible,
   font-size: 10.5px;
   font-family: var(--mono);
   fill: var(--muted);
+  /* 辺や他のラベルに重なっても読めるよう、地色のフチをグリフの外側に回す */
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 3px;
+  stroke-linejoin: round;
 }
 
 .edge-label.catch {

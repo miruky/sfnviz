@@ -178,9 +178,12 @@ function renderFlow(
         ? (() => {
             const from = layout.boxes.get(e.from) as Box;
             const to = layout.boxes.get(e.to) as Box;
-            const lx = (from.x + from.w / 2 + to.x + to.w / 2) / 2 + offsetX;
+            const fromCx = from.x + from.w / 2;
+            const toCx = to.x + to.w / 2;
+            // 分岐が同じ点から扇状に出ると中点ではラベルが重なるので、行き先寄りに置いて散らす
+            const lx = fromCx * 0.35 + toCx * 0.65 + offsetX;
             const ly = (from.y + from.h + to.y) / 2 + offsetY;
-            return `<text class="edge-label ${e.kind}" x="${lx}" y="${ly}" text-anchor="middle">${esc(clip(e.label, 30))}</text>`;
+            return `<text class="edge-label ${e.kind}" x="${lx}" y="${ly}" text-anchor="middle">${esc(clip(e.label, 24))}</text>`;
           })()
         : '';
       return `<g transform="translate(${offsetX} ${offsetY})"><path class="edge ${e.kind}" d="${d}" marker-end="url(#sfn-arrow)"/></g>${label}`;
